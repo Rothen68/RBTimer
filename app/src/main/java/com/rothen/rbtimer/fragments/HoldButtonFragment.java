@@ -1,7 +1,9 @@
 package com.rothen.rbtimer.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -19,6 +21,8 @@ import com.rothen.rbtimer.R;
 
 public class HoldButtonFragment extends Fragment {
 
+    public static final int BACK_TO_NORMAL_DURATION = 3 * 1000;
+
     public interface HoldButtonListener
     {
         public void holdButtonBeginTouch();
@@ -29,11 +33,27 @@ public class HoldButtonFragment extends Fragment {
     private Button btnHold;
     private ProgressBar pgrProgress;
 
+    private CountDownTimer timer;
+    private double currentR;
+    private double currentG;
+    private double currentB;
+
+    private double targetR;
+    private double targetG;
+    private double targetB;
+
+    private double deltaR;
+    private double deltaG;
+    private double deltaB;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try{
             listener = (HoldButtonListener) context;
+
+            targetR = Color.red(getResources().getColor(R.color.colorDefault));
+            targetG = Color.green(getResources().getColor(R.color.colorDefault));
+            targetB = Color.blue(getResources().getColor(R.color.colorDefault));
         }
         catch(Exception e)
         {
@@ -77,6 +97,59 @@ public class HoldButtonFragment extends Fragment {
     public void setBtnHoldText(String text)
     {
         btnHold.setText(text);
+    }
+
+    public void onChangeColor(int color)
+    {
+        if(timer!=null)
+        {
+            timer.cancel();
+        }
+        currentR = Color.red(color);
+        currentG = Color.green(color);
+        currentB = Color.blue(color);
+
+
+
+        deltaR = Math.abs(targetR - currentR) / (BACK_TO_NORMAL_DURATION/100.0);
+        deltaG = Math.abs(targetG - currentG) / (BACK_TO_NORMAL_DURATION/100.0);
+        deltaB = Math.abs(targetB - currentB) / (BACK_TO_NORMAL_DURATION/100.0);
+
+        timer = new CountDownTimer(BACK_TO_NORMAL_DURATION,100) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if(currentR>targetR)
+                {
+                    currentR-=deltaR;
+                }
+                else
+                {
+                    currentR+=deltaR;
+                }
+                if(currentG>targetG)
+                {
+                    currentG-=deltaG;
+                }
+                else
+                {
+                    currentG+=deltaG;
+                }
+                if(currentB>targetB)
+                {
+                    currentB-=deltaB;
+                }
+                else
+                {
+                    currentB+=deltaB;
+                }
+                btnHold.setBackgroundColor(Color.rgb((int)currentR,(int)currentG,(int)currentB));
+            }
+
+            @Override
+            public void onFinish() {
+                btnHold.setBackgroundColor(getResources().getColor(R.color.colorDefault));
+            }
+        }.start();
     }
 
     @Override

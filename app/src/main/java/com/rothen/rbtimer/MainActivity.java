@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.rothen.rbtimer.Service.SensorManagement;
 import com.rothen.rbtimer.fragments.EditTimeFragment;
 import com.rothen.rbtimer.fragments.HoldButtonFragment;
 import com.rothen.rbtimer.fragments.TimerFragment;
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     private boolean isBombArmed;
     private boolean isBombExplosed;
 
+    private SensorManagement sensorManagement;
+
     private void setBombDisarmed()
     {
         isBombArmed = false;
@@ -61,6 +64,23 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         setContentView(R.layout.activity_main);
         timerFragment = (TimerFragment)  getSupportFragmentManager().findFragmentById(R.id.fragTimer);
         holdButtonFragment = (HoldButtonFragment) getSupportFragmentManager().findFragmentById(R.id.fragHoldButton);
+
+        sensorManagement = new SensorManagement(this, new SensorManagement.SensorListener() {
+            @Override
+            public void onStrongMouvement() {
+                setBombExplosed();
+                holdButtonFragment.onChangeColor(getResources().getColor(R.color.colorDefault));
+            }
+
+            @Override
+            public void onWeakMouvement() {
+                holdButtonFragment.onChangeColor(getResources().getColor(R.color.colorDanger));
+            }
+
+            @Override
+            public void onNonSignificantMovement() {
+            }
+        });
     }
 
     @Override
@@ -70,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         bombTime = prefs.getInt(BOMB_TIME, BOMB_DEFAULT_TIME);
         buttonPressTime = prefs.getInt(BUTTON_PRESS_TIME,BUTTON_DEFAULT_TIME);
         resetBomb();
+        sensorManagement.onResume();
     }
 
     @Override
@@ -79,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         editor.putInt(BOMB_TIME,bombTime);
         editor.putInt(BUTTON_PRESS_TIME,buttonPressTime);
         editor.apply();
+        sensorManagement.onPause();
         super.onPause();
     }
 
@@ -148,11 +170,16 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
 
             @Override
             public void onFinish() {
-                timerFragment.setTimer("BOOM");
-                isBombExplosed = true;
-                holdButtonFragment.setBtnHoldText("Reset bomb");
+                setBombExplosed();
             }
         }.start();
+    }
+
+    private void setBombExplosed()
+    {
+        timerFragment.setTimer("BOOM");
+        isBombExplosed = true;
+        holdButtonFragment.setBtnHoldText("Reset bomb");
     }
 
     @Override
@@ -198,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
             buttonPressTime = value*1000;
         }
     }
+
 
 
 }
