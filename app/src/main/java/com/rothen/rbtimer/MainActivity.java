@@ -180,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         timerFragment.setTimer("BOOM");
         isBombExplosed = true;
         holdButtonFragment.setBtnHoldText("Reset bomb");
+        if(bombCountDown!=null) {
+            bombCountDown.cancel();
+        }
     }
 
     @Override
