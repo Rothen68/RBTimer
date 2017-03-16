@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item android:title="Bomb Duration" android:id="@+id/mnuBombDuration" />
-    <item android:title="Hold Button Duration" android:id="@+id/mnuHoldButtonDuration" />
+    <item android:title="@string/settings" android:id="@+id/mnuSettings" />
+
 </menu>

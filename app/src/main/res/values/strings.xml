@@ -3,4 +3,18 @@
     <string name="editTime">New time in second : </string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="settings">Settings</string>
+    <string name="settings_Bomb">Bomb</string>
+    <string name="settings_HoldButtonDuration">Hold button</string>
+    <string name="settings_Bip">Buzzer</string>
+    <string name="settings_Bip_Fast">Fast bip at (s)</string>
+    <string name="settings_Bip_Slow">Slow bip at (s)</string>
+
+    <string name="duration">Duration (s)</string>
+
+    <string name="speed">Speed</string>
+
+
 </resources>

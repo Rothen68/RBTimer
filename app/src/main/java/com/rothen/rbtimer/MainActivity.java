@@ -1,6 +1,7 @@
 package com.rothen.rbtimer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.support.v4.app.DialogFragment;
@@ -12,13 +13,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.rothen.rbtimer.Service.SensorManagement;
+import com.rothen.rbtimer.Service.SettingsService;
 import com.rothen.rbtimer.Service.SoundService;
 import com.rothen.rbtimer.fragments.EditTimeFragment;
 import com.rothen.rbtimer.fragments.HoldButtonFragment;
 import com.rothen.rbtimer.fragments.TimerFragment;
 import com.rothen.rbtimer.utils.Utils;
 
-public class MainActivity extends AppCompatActivity implements HoldButtonFragment.HoldButtonListener, EditTimeFragment.EditTimeDialogListener {
+public class MainActivity extends AppCompatActivity implements HoldButtonFragment.HoldButtonListener {
 
     private CountDownTimer buttonCountDown;
     private CountDownTimer bombCountDown;
@@ -26,15 +28,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     private TimerFragment timerFragment;
     private HoldButtonFragment holdButtonFragment;
 
-    private static final int BUTTON_DEFAULT_TIME = 5*1000;
-    public static final String BUTTON_PRESS_TIME = "ButtonPressTime";
-
-    private int buttonPressTime;
-
-    private static final int BOMB_DEFAULT_TIME =  30*1000;
-    public static final String BOMB_TIME = "BombTime";
-
-    private int bombTime;
+    private SettingsService settingsService;
 
     private boolean isBombArmed;
     private boolean isBombExplosed;
@@ -46,19 +40,19 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     {
         isBombArmed = false;
         holdButtonFragment.setBtnHoldText("Arm bomb");
-        soundService.playSound(R.raw.ct_win,this);
     }
+
     private void setBombArmed()
     {
-        soundService.playSound(R.raw.bomb_planted,this);
         isBombArmed = true;
         holdButtonFragment.setBtnHoldText("Disarm Bomb");
+        soundService.bombPlanted();
     }
 
     private void setBombExplosed()
     {
-        soundService.playSound(R.raw.terro_win,this);
         timerFragment.setTimer("BOOM");
+        soundService.bombExplose();
         isBombExplosed = true;
         holdButtonFragment.setBtnHoldText("Reset bomb");
         if(bombCountDown!=null) {
@@ -72,7 +66,17 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         isBombArmed = false;
         holdButtonFragment.setBtnHoldText("Arm bomb");
         isBombExplosed = false;
-        timerFragment.setTimer(Utils.millisecondToStringTimer(bombTime));
+        timerFragment.setTimer(Utils.millisecondToStringTimer(settingsService.getBombTime()));
+    }
+
+    private void terroWins()
+    {
+        soundService.terroWins();
+    }
+
+    private void ctWins()
+    {
+        soundService.ctWins();
     }
 
     @Override
@@ -86,6 +90,14 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
             @Override
             public void onStrongMouvement() {
                 setBombExplosed();
+                if(isBombArmed)
+                {
+                    terroWins();
+                }
+                else
+                {
+                    ctWins();
+                }
                 holdButtonFragment.onChangeColor(getResources().getColor(R.color.colorDefault));
             }
 
@@ -99,26 +111,19 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
             }
         });
 
-        soundService = new SoundService();
+        soundService = new SoundService(this);
+        settingsService = new SettingsService(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
-        bombTime = prefs.getInt(BOMB_TIME, BOMB_DEFAULT_TIME);
-        buttonPressTime = prefs.getInt(BUTTON_PRESS_TIME,BUTTON_DEFAULT_TIME);
         resetBomb();
         sensorManagement.onResume();
     }
 
     @Override
     protected void onPause() {
-        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(BOMB_TIME,bombTime);
-        editor.putInt(BUTTON_PRESS_TIME,buttonPressTime);
-        editor.apply();
         sensorManagement.onPause();
         super.onPause();
     }
@@ -127,11 +132,9 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     public boolean onOptionsItemSelected(MenuItem item) {
         if(!isBombArmed) {
             switch (item.getItemId()) {
-                case R.id.mnuBombDuration:
-                    displayEditTime(bombTime / 1000, BOMB_TIME);
-                    return true;
-                case R.id.mnuHoldButtonDuration:
-                    displayEditTime(buttonPressTime / 1000, BUTTON_PRESS_TIME);
+                case R.id.mnuSettings:
+                    Intent i = new Intent(this, SettingsActivity.class);
+                    startActivity(i);
                     return true;
 
                 default:
@@ -146,10 +149,11 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     @Override
     public void holdButtonBeginTouch() {
         if(!isBombExplosed) {
-            buttonCountDown = new CountDownTimer(buttonPressTime, 100) {
+            buttonCountDown = new CountDownTimer(settingsService.getButtonPressTime(), 100) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / buttonPressTime)));
+                    holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / settingsService.getButtonPressTime())));
+
                 }
 
                 @Override
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
                         bombCountDown.cancel();
                         diplayRemainingTime();
                         setBombDisarmed();
+                        ctWins();
                         resetBomb();
                     } else {
                         setBombArmed();
@@ -181,16 +186,36 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
                 .setTitle("Bomb disarmed ! ").show();
     }
 
+    private long second;
     private void startBombTimer() {
-        bombCountDown = new CountDownTimer(bombTime,13) {
+        second = settingsService.getBombTime();
+        bombCountDown = new CountDownTimer(settingsService.getBombTime(),10) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timerFragment.setTimer(Utils.millisecondToStringTimer(millisUntilFinished));
-            }
+
+                if(millisUntilFinished< settingsService.getBipFastTime() )
+                {
+                    if(millisUntilFinished+1000<second) {
+                        soundService.makeBip();
+                        second = millisUntilFinished;
+                    }
+                }
+                else if (millisUntilFinished<settingsService.getBipSlowTime())
+
+                    if(millisUntilFinished + 2000 <second) {
+                        soundService.makeBip();
+                        second = millisUntilFinished;
+                    }
+                }
+
 
             @Override
             public void onFinish() {
                 setBombExplosed();
+
+                terroWins();
+
             }
         }.start();
     }
@@ -215,31 +240,6 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     }
 
 
-
-    //EditTimeDialog
-    private void displayEditTime(int currentDuration, String valueType)
-    {
-        EditTimeFragment frag = new EditTimeFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(EditTimeFragment.OLD_VALUE,currentDuration);
-        bundle.putString(EditTimeFragment.VALUE_TYPE, valueType);
-        frag.setArguments(bundle);
-        frag.show(getSupportFragmentManager(),"EditTime");
-
-    }
-
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog,String valueType, int value) {
-        if(valueType.equals(BOMB_TIME))
-        {
-            bombTime = value*1000;
-            resetBomb();
-        }
-        else if(valueType.equals(BUTTON_PRESS_TIME))
-        {
-            buttonPressTime = value*1000;
-        }
-    }
 
 
 

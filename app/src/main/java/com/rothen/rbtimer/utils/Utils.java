@@ -32,4 +32,25 @@ public class Utils {
         valeur = valeur + String.valueOf(milli);
         return valeur;
     }
+
+    public static String millisecondToStringTimerInSecond(long m)
+    {
+        int heure = (int) m / 3600000 ;
+        int minute = (int) (m - 3600000 * heure) / 60000;
+        int seconde = (int) (m - 3600000 * heure - 60000 * minute) /1000;
+        String valeur = new String();
+        if (heure < 10)
+            valeur = valeur + "0";
+        valeur = valeur + String.valueOf(heure) + " : ";
+
+        if (minute < 10)
+            valeur = valeur + "0";
+        valeur = valeur + String.valueOf(minute) + " : ";
+
+        if (seconde < 10)
+            valeur = valeur + "0";
+        valeur = valeur + String.valueOf(seconde) + " s ";
+
+        return valeur;
+    }
 }
