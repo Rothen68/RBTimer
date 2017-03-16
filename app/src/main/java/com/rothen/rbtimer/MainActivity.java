@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.rothen.rbtimer.Service.SensorManagement;
+import com.rothen.rbtimer.Service.SoundService;
 import com.rothen.rbtimer.fragments.EditTimeFragment;
 import com.rothen.rbtimer.fragments.HoldButtonFragment;
 import com.rothen.rbtimer.fragments.TimerFragment;
@@ -39,21 +40,37 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     private boolean isBombExplosed;
 
     private SensorManagement sensorManagement;
+    private SoundService soundService;
 
     private void setBombDisarmed()
     {
         isBombArmed = false;
         holdButtonFragment.setBtnHoldText("Arm bomb");
+        soundService.playSound(R.raw.ct_win,this);
     }
     private void setBombArmed()
     {
+        soundService.playSound(R.raw.bomb_planted,this);
         isBombArmed = true;
         holdButtonFragment.setBtnHoldText("Disarm Bomb");
     }
 
+    private void setBombExplosed()
+    {
+        soundService.playSound(R.raw.terro_win,this);
+        timerFragment.setTimer("BOOM");
+        isBombExplosed = true;
+        holdButtonFragment.setBtnHoldText("Reset bomb");
+        if(bombCountDown!=null) {
+            bombCountDown.cancel();
+        }
+
+    }
+
     private void resetBomb()
     {
-        setBombDisarmed();
+        isBombArmed = false;
+        holdButtonFragment.setBtnHoldText("Arm bomb");
         isBombExplosed = false;
         timerFragment.setTimer(Utils.millisecondToStringTimer(bombTime));
     }
@@ -81,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
             public void onNonSignificantMovement() {
             }
         });
+
+        soundService = new SoundService();
     }
 
     @Override
@@ -139,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
                     if (isBombArmed) {
                         bombCountDown.cancel();
                         diplayRemainingTime();
+                        setBombDisarmed();
                         resetBomb();
                     } else {
                         setBombArmed();
@@ -175,15 +195,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         }.start();
     }
 
-    private void setBombExplosed()
-    {
-        timerFragment.setTimer("BOOM");
-        isBombExplosed = true;
-        holdButtonFragment.setBtnHoldText("Reset bomb");
-        if(bombCountDown!=null) {
-            bombCountDown.cancel();
-        }
-    }
+
 
     @Override
     public void holdButtonEndTouch() {
