@@ -11,6 +11,12 @@
     <string name="settings_Bip">Buzzer</string>
     <string name="settings_Bip_Fast">Fast bip at (s)</string>
     <string name="settings_Bip_Slow">Slow bip at (s)</string>
+    <string name="settings_NFC">NFC</string>
+    <string name="settings_NFCAvailableAndEnabled">NFC is available and enabled</string>
+    <string name="settings_NFCAvailableNotEnabled">NFC is available but is not enabled</string>
+    <string name="settings_NFCNotAvailable">NFC is not available</string>
+
+    <string name="settings_NFCId">NFC Id</string>
 
     <string name="duration">Duration (s)</string>
 

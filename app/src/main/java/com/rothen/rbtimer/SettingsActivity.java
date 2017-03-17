@@ -1,20 +1,15 @@
 package com.rothen.rbtimer;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.rothen.rbtimer.Service.NFCService;
 import com.rothen.rbtimer.Service.SettingsService;
-import com.rothen.rbtimer.utils.Utils;
-
-import java.util.Set;
 
 
 public class SettingsActivity extends AppCompatActivity {
@@ -24,15 +19,26 @@ public class SettingsActivity extends AppCompatActivity {
     private EditText txtHoldButtonDuration;
     private EditText txtBipSlowDuration;
     private EditText txtBipFastDuration;
+
+    private TextView txtNFCAvailable;
+    private TextView txtNFCId;
+
     private Button btnSave;
 
     private SettingsService settingsService;
+    private NFCService nfcService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         settingsService = new SettingsService(this);
+        nfcService = new NFCService(this, new NFCService.NFCAdapterListener() {
+            @Override
+            public void onTagConnectionLost() {
+                txtNFCId.setText("");
+            }
+        });
 
         btnSave = (Button) findViewById(R.id.btnSave);
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -46,13 +52,34 @@ public class SettingsActivity extends AppCompatActivity {
         txtHoldButtonDuration =(EditText) findViewById(R.id.txtHoldButtonDuration);
         txtBipSlowDuration =(EditText) findViewById(R.id.txtSlowBipDuration);
         txtBipFastDuration =(EditText) findViewById(R.id.txtFastBipDuration);
+        txtNFCAvailable = (TextView) findViewById(R.id.txtNFCAvailable);
+        txtNFCId = (TextView)findViewById(R.id.txtNFCId);
 
         txtBipFastDuration.setText(settingsService.getBipFastTime()/1000 + "");
         txtBipSlowDuration.setText(settingsService.getBipSlowTime()/1000 + "");
         txtHoldButtonDuration.setText(settingsService.getButtonPressTime()/1000 + "");
         txtBombDuration.setText(settingsService.getBombTime()/1000 + "");
 
+        if(nfcService.isNFCAvailable())
+        {
+            if(nfcService.isNFCEnabled())
+            {
+                txtNFCAvailable.setText(R.string.settings_NFCAvailableAndEnabled);
+                txtNFCAvailable.setTextColor(getResources().getColor(R.color.colorDefault));
+            }
+            else
+            {
+                txtNFCAvailable.setText(R.string.settings_NFCAvailableNotEnabled);
+                txtNFCAvailable.setTextColor(getResources().getColor(R.color.colorWarning));
+            }
+        }
+        else
+        {
+            txtNFCAvailable.setText(R.string.settings_NFCNotAvailable);
+            txtNFCAvailable.setTextColor(getResources().getColor(R.color.colorDanger));
+        }
     }
+
 
     private void CheckAndSaveSettings() {
         int i = Integer.valueOf(txtBipFastDuration.getText().toString()) * 1000;
@@ -93,10 +120,19 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-
+    protected void onPause() {
+        super.onPause();
+        nfcService.unRegisterIntentFilter(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        nfcService.registerIntentFilter(SettingsActivity.class, this);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        txtNFCId.setText(nfcService.lookupTag(intent));
+    }
 }

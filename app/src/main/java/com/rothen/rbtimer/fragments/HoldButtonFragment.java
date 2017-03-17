@@ -160,5 +160,10 @@ public class HoldButtonFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        if(timer != null)
+        {
+            timer.cancel();
+        }
+
     }
 }

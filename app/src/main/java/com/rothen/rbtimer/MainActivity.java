@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
         if(bombCountDown!=null) {
             bombCountDown.cancel();
         }
-
     }
 
     private void resetBomb()
@@ -125,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
     @Override
     protected void onPause() {
         sensorManagement.onPause();
+        if(buttonCountDown != null) buttonCountDown.cancel();
+        if(bombCountDown != null) bombCountDown.cancel();
         super.onPause();
     }
 
@@ -153,9 +154,7 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
                 @Override
                 public void onTick(long millisUntilFinished) {
                     holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / settingsService.getButtonPressTime())));
-
                 }
-
                 @Override
                 public void onFinish() {
                     holdButtonFragment.setProgressState(0);
@@ -169,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements HoldButtonFragmen
                         setBombArmed();
                         startBombTimer();
                     }
-
                 }
             }.start();
         }
