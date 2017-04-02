@@ -1,4 +1,4 @@
-package com.rothen.rbtimer.Service;
+package com.rothen.rbtimer.service;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -7,14 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.MifareUltralight;
-import android.nfc.tech.Ndef;
-import android.nfc.tech.NfcA;
-import android.nfc.tech.NfcB;
-import android.nfc.tech.NfcF;
-import android.nfc.tech.NfcV;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -42,20 +36,23 @@ public class NFCService implements NfcAdapter.ReaderCallback {
     private NfcAdapter nfcAdapter;
 
     private CountDownTimer tagPresenceCheckTimer;
-    private MifareClassic mifareClassic;
+    private INfcObject nfcObject;
 
     // list of NFC technologies detected:
     private final String[][] techList = new String[][] {
             new String[] {
-                    NfcA.class.getName(),
-                    NfcB.class.getName(),
-                    NfcF.class.getName(),
-                    NfcV.class.getName(),
-                    IsoDep.class.getName(),
+//                    NfcA.class.getName(),
+//                    NfcB.class.getName(),
+//                    NfcF.class.getName(),
+//                    NfcV.class.getName(),
+//                    IsoDep.class.getName(),
                     MifareClassic.class.getName(),
-                    MifareUltralight.class.getName(), Ndef.class.getName()
+                    MifareUltralight.class.getName(),
+//                    Ndef.class.getName()
             }
     };
+
+
 
     public NFCService(Context context, NFCAdapterListener listener)
     {
@@ -116,24 +113,24 @@ public class NFCService implements NfcAdapter.ReaderCallback {
 
     @Override
     public void onTagDiscovered(Tag tag) {
-        mifareClassic = MifareClassic.get(tag);
+
+        nfcObject = NfcObject.createNFCObjectFromTag(tag);
         try {
-            mifareClassic.connect();
+            nfcObject.connect();
             startLoopTagPresenceTimer();
 
         } catch (IOException e) {
             Log.e("NFC", e.getMessage());
         }
-
-
     }
+
 
     private void startLoopTagPresenceTimer()
     {
-        tagPresenceCheckTimer = new CountDownTimer(60000,100) {
+        tagPresenceCheckTimer = new CountDownTimer(60000,500) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if(!mifareClassic.isConnected())
+                if(!nfcObject.isConnected())
                 {
                     listener.onTagConnectionLost();
                     tagPresenceCheckTimer.cancel();

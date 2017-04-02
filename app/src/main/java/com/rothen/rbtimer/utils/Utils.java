@@ -1,5 +1,7 @@
 package com.rothen.rbtimer.utils;
 
+import java.util.List;
+
 /**
  * Utility class
  * Created by apest on 14/03/2017.
@@ -94,5 +96,19 @@ public class Utils {
                     + Character.digit(s.charAt(i+1), 16));
         }
         return data;
+    }
+
+    /**
+     *
+     */
+
+    public static boolean stringArrayContainsString(String[]list, String search)
+    {
+        for(String s : list)
+        {
+            if (s.equals(search))
+                return true;
+        }
+        return false;
     }
 }

@@ -83,7 +83,7 @@ public class HoldButtonFragment extends Fragment {
             }
         });
         pgrProgress = (ProgressBar) v.findViewById(R.id.pgrProgress);
-
+        btnHold.setBackgroundColor(getResources().getColor(R.color.colorDefault));
         return v;
     }
 
@@ -99,15 +99,34 @@ public class HoldButtonFragment extends Fragment {
         btnHold.setText(text);
     }
 
-    public void onChangeColor(int color)
+    public void setPercentage(double percentage)
+    {
+        int base = getResources().getColor(R.color.colorDanger);
+        int target = getResources().getColor(R.color.colorDefault);
+        int r = (int) (Color.red(target)+ (Color.red(base) - Color.red(target)) * percentage/100);
+        int g = (int) (Color.green(target)+ (Color.green(base) - Color.green(target)) * percentage/100);
+        int b = (int) (Color.blue(target)+ (Color.blue(base) - Color.blue(target)) * percentage/100);
+        onChangeColor(Color.rgb(r,g,b));
+    }
+
+    private void onChangeColor(int color)
     {
         if(timer!=null)
         {
             timer.cancel();
         }
-        currentR = Color.red(color);
-        currentG = Color.green(color);
-        currentB = Color.blue(color);
+        if(Math.abs(currentR - targetR) < Math.abs(Color.red(color) - targetR))
+        {
+            currentR = Color.red(color);
+        }
+        if(Math.abs(currentG - targetG) < Math.abs(Color.green(color) - targetG))
+        {
+            currentG = Color.green(color);
+        }
+        if(Math.abs(currentB - targetB) < Math.abs(Color.blue(color) - targetB))
+        {
+            currentB = Color.blue(color);
+        }
 
 
 

@@ -6,12 +6,24 @@
     <string name="title_activity_settings">Settings</string>
 
     <string name="settings">Settings</string>
+    <string name="settings_accelerometers">Accelerometers</string>
+    <string name="settings_accelerometers_CT">Counter Terro (G)</string>
+    <string name="settings_accelerometers_T">Terro (G)</string>
+
     <string name="settings_Bomb">Bomb</string>
-    <string name="settings_HoldButtonDuration">Hold button</string>
-    <string name="settings_Bip">Buzzer</string>
-    <string name="settings_Bip_Fast">Fast bip at (s)</string>
-    <string name="settings_Bip_Slow">Slow bip at (s)</string>
+    <string name="settings_Bomb_duration">Duration (s)</string>
+    <string name="settings_Bomb_armDuration">Arm duration (s)</string>
+    <string name="settings_Bomb_disarmDuration">Disarm duration (s)</string>
+    <string name="settings_Bomb_defuseKitFactor">DefuseKit factor (time/factor)</string>
+    <string name="settings_Bomb_delaySowBip">Fast bip at (s)</string>
+    <string name="settings_Bomb_delayFastBip">Slow bip at (s)</string>
     <string name="settings_NFC">NFC</string>
+    <string name="settings_NFC_IsEnabled">NFC is enabled ? </string>
+
+
+
+
+
     <string name="settings_NFCAvailableAndEnabled">NFC is available and enabled</string>
     <string name="settings_NFCAvailableNotEnabled">NFC is available but is not enabled</string>
     <string name="settings_NFCNotAvailable">NFC is not available</string>
