@@ -79,6 +79,10 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                         parameterValue.setInputType(InputType.TYPE_CLASS_NUMBER);
                         break;
+                    case TYPE_STRING:
+                        parameterValue.setText(p.getValue() +"" );
+                        parameterValue.setInputType(InputType.TYPE_CLASS_TEXT);
+                        break;
                     case TYPE_FLOAT:
                     case TYPE_INT:
                         parameterValue.setText(p.getValue() +"" );
@@ -119,6 +123,9 @@ public class SettingsActivity extends AppCompatActivity {
                                     break;
                                 case TYPE_INT:
                                     p.setValue(Integer.valueOf(etxt.getText().toString()));
+                                    break;
+                                case TYPE_STRING:
+                                    p.setValue(etxt.getText().toString());
                                     break;
                             }
                         }

@@ -94,6 +94,11 @@ public class HoldButtonFragment extends Fragment {
         }
     }
 
+    public void setBtnHoldEnabled(boolean enabled)
+    {
+        btnHold.setEnabled(enabled);
+    }
+
     public void setBtnHoldText(String text)
     {
         btnHold.setText(text);

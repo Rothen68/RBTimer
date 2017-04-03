@@ -19,14 +19,22 @@
     <string name="settings_Bomb_delayFastBip">Slow bip at (s)</string>
     <string name="settings_NFC">NFC</string>
     <string name="settings_NFC_IsEnabled">NFC is enabled ? </string>
+    <string name="settings_NFC_BombDropZoneTag">Bomb drop zone tag </string>
+    <string name="settings_NFC_DefuseTag">Defuse tag </string>
 
 
-
+    <string name="bombDefuse_TerroWins">Terro win !</string>
+    <string name="bombDefuse_CTWins">CT win !</string>
+    <string name="bombDefuse_ArmBomb">Arm Bomb</string>
+    <string name="bombDefuse_DisarmBomb">Disarm Bomb</string>
+    <string name="bombDefuse_DisarmBombWithDefuse">Disarm Bomb with DefuseKit</string>
+    <string name="bombDefuse_ResetBomb">ResetBomb</string>
 
 
     <string name="settings_NFCAvailableAndEnabled">NFC is available and enabled</string>
     <string name="settings_NFCAvailableNotEnabled">NFC is available but is not enabled</string>
     <string name="settings_NFCNotAvailable">NFC is not available</string>
+
 
     <string name="settings_NFCId">NFC Id</string>
 

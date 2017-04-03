@@ -94,6 +94,28 @@ public class ParametersService extends SettingsService {
         throw new IllegalArgumentException(categoryId + " " + parameterId + " not found");
     }
 
+    public String getString(String categoryId, String parameterId)
+    {
+        for(SettingsCategory c : settingsParameters)
+        {
+            if(c.getCategoryId().equals(categoryId))
+            {
+                for(SettingsParameter p : c.getParameterList())
+                {
+                    if(p.getKey().equals(parameterId))
+                    {
+                        if(p.getParameterType()== SettingsParameterType.TYPE_STRING)
+                        {
+                            return (String) p.getValue();
+                        }
+                        throw new IllegalArgumentException(categoryId + " " + parameterId + " is not an string");
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException(categoryId + " " + parameterId + " not found");
+    }
+
     public void setInt(String categoryId, String parameterId, int value)
     {
         for(SettingsCategory c : settingsParameters)
@@ -138,7 +160,7 @@ public class ParametersService extends SettingsService {
         throw new IllegalArgumentException(categoryId + " " + parameterId + " not found");
     }
 
-    public void getFloat(String categoryId, String parameterId,float value)
+    public void setFloat(String categoryId, String parameterId,float value)
     {
         for(SettingsCategory c : settingsParameters)
         {
@@ -159,5 +181,25 @@ public class ParametersService extends SettingsService {
         }
         throw new IllegalArgumentException(categoryId + " " + parameterId + " not found");
     }
-
+    public void setString(String categoryId, String parameterId,String value)
+    {
+        for(SettingsCategory c : settingsParameters)
+        {
+            if(c.getCategoryId().equals(categoryId))
+            {
+                for(SettingsParameter p : c.getParameterList())
+                {
+                    if(p.getKey().equals(parameterId))
+                    {
+                        if(p.getParameterType()== SettingsParameterType.TYPE_STRING)
+                        {
+                            p.setValue(value);
+                        }
+                        throw new IllegalArgumentException(categoryId + " " + parameterId + " is not a String");
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException(categoryId + " " + parameterId + " not found");
+    }
 }

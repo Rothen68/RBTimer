@@ -55,6 +55,9 @@ public class SettingsService {
             case TYPE_INT:
                 editor.putInt(parameter.getKey(), (int) parameter.getValue());
                 break;
+            case TYPE_STRING:
+                editor.putString(parameter.getKey(),(String) parameter.getValue());
+                break;
         }
         if (!multipleInsert) {
             editor.commit();
@@ -82,6 +85,9 @@ public class SettingsService {
                 break;
             case TYPE_INT:
                 parameter.setValue(prefs.getInt(parameter.getKey(),(int)parameter.getDefaultValue()));
+                break;
+            case TYPE_STRING:
+                parameter.setValue(prefs.getString(parameter.getKey(),(String) parameter.getDefaultValue()));
                 break;
         }
         return parameter;

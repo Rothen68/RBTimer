@@ -31,17 +31,50 @@ public class BombSettingsParameters implements IActivitySettingsParameters {
 
     public static final String CAT_NFC = "CAT_NFC";
     public static final String PAR_NFC_ISENABLED= CAT_BOMB + "PAR_NFC_ISENABLED";
+    public static final String PAR_NFC_BOMBDROPZONETAG= CAT_BOMB + "PAR_NFC_BOMBDROPZONETAG";
+    public static final String PAR_NFC_DEFUSETAG= CAT_BOMB + "PAR_NFC_DEFUSETAG";
 
     private List<SettingsCategory> listSettings;
 
     public BombSettingsParameters(Context context) {
         Resources resources = context.getResources();
+        String title;
         listSettings = new ArrayList<>();
+
+        SettingsCategory nfc = new SettingsCategory();
+        nfc.setCategoryTitle(resources.getString(R.string.settings_NFC));
+        nfc.setCategoryId(CAT_NFC);
+        title = resources.getString(R.string.settings_NFC_IsEnabled);
+        nfc.addParameter(new SettingsParameter(
+                title,
+                PAR_NFC_ISENABLED,
+                false,
+                true,
+                SettingsParameterType.TYPE_BOOLEAN
+        ));
+        title = resources.getString(R.string.settings_NFC_BombDropZoneTag);
+        nfc.addParameter(new SettingsParameter(
+                title,
+                PAR_NFC_BOMBDROPZONETAG,
+                "",
+                "",
+                SettingsParameterType.TYPE_STRING
+        ));
+        title = resources.getString(R.string.settings_NFC_DefuseTag);
+        nfc.addParameter(new SettingsParameter(
+                title,
+                PAR_NFC_DEFUSETAG,
+                "",
+                "",
+                SettingsParameterType.TYPE_STRING
+        ));
+
+        listSettings.add(nfc);
 
         SettingsCategory accelerometers = new SettingsCategory();
         accelerometers.setCategoryTitle(resources.getString(R.string.settings_accelerometers));
         accelerometers.setCategoryId(CAT_ACCELEROMETERS);
-        String title = resources.getString(R.string.settings_accelerometers_CT);
+        title = resources.getString(R.string.settings_accelerometers_CT);
         accelerometers.addParameter(new SettingsParameter(
                 title,
                 PAR_ACCELEROMETERS_CT,
@@ -112,18 +145,7 @@ public class BombSettingsParameters implements IActivitySettingsParameters {
         ));
         listSettings.add(bomb);
 
-        SettingsCategory nfc = new SettingsCategory();
-        nfc.setCategoryTitle(resources.getString(R.string.settings_NFC));
-        nfc.setCategoryId(CAT_NFC);
-        title = resources.getString(R.string.settings_NFC_IsEnabled);
-        nfc.addParameter(new SettingsParameter(
-                title,
-                PAR_NFC_ISENABLED,
-                false,
-                true,
-                SettingsParameterType.TYPE_BOOLEAN
-        ));
-        listSettings.add(nfc);
+
     }
 
     @Override
