@@ -9,4 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Bomb Plant" />
+    <Button
+        android:id="@+id/btnCaptureTheFlagActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Capture The Flaq" />
 </LinearLayout>
