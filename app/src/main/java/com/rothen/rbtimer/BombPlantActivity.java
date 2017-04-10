@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.rothen.rbtimer.model.BombSettingsParameters;
 import com.rothen.rbtimer.model.SettingsCategory;
@@ -43,7 +44,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
     private TimerFragment timerFragment;
     private HoldButtonFragment holdButtonFragment;
 
-    private ParametersService parametersService;
+
 
     private boolean isBombArmed;
     private boolean isBombExplosed;
@@ -51,6 +52,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
 
     private SensorManagement sensorManagement;
     private SoundService soundService;
+    private ParametersService parametersService;
 
     private NFCService nfcService;
     private String currentNFCTag = "";
@@ -63,6 +65,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bomb_plant);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         timerFragment = (TimerFragment) getSupportFragmentManager().findFragmentById(R.id.fragTimer);
         holdButtonFragment = (HoldButtonFragment) getSupportFragmentManager().findFragmentById(R.id.fragHoldButton);
 

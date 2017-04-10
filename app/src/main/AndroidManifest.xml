@@ -37,8 +37,11 @@
         </activity>
         <activity
             android:name=".BombPlantActivity"
-            android:label="Bomb Plant" />
-        <activity android:name=".SettingsActivity"></activity>
+            android:label="Bomb Plant"
+            android:screenOrientation="portrait" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".CaptureTheFlagActivity"
+            android:screenOrientation="landscape" ></activity>
     </application>
 
 </manifest>
