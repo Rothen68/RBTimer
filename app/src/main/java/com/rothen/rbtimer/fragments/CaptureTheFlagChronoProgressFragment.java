@@ -29,7 +29,6 @@ public class CaptureTheFlagChronoProgressFragment extends Fragment {
         pbBlue = (ProgressBar) v.findViewById(R.id.pgrBlueProgress);
         pbBlue.getProgressDrawable().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
         pbRed.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
-        setProgress(76);
         return v;
     }
 
