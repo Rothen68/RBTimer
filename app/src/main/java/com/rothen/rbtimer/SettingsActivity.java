@@ -11,6 +11,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.rothen.rbtimer.model.BombSettingsParameters;
+import com.rothen.rbtimer.model.CaptureTheFlagSettingsParameters;
 import com.rothen.rbtimer.model.IActivitySettingsParameters;
 import com.rothen.rbtimer.model.SettingsCategory;
 import com.rothen.rbtimer.model.SettingsParameter;
@@ -42,6 +43,10 @@ public class SettingsActivity extends AppCompatActivity {
         if(activity.equals(BombPlantActivity.BOMBPLANT_ACTIVITY))
         {
             settingsParameters = new BombSettingsParameters(this);
+        }
+        else if(activity.equals(CaptureTheFlagActivity.CAPTURETHEFLAG_ACTIVITY))
+        {
+            settingsParameters = new CaptureTheFlagSettingsParameters(this);
         }
         else
         {
