@@ -153,7 +153,8 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
         {
             buttonPressCountDown.cancel();
         }
-        blockButton(currentTeamCapture);
+        if(currentTeamCapture == 0){
+            blockButton(0);}
     }
 
     private void holdButtonBeginTouch(View view) {
