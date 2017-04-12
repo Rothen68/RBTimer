@@ -28,6 +28,10 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
 
     public static final String CAPTURETHEFLAG_ACTIVITY = "CAPTURETHEFLAG_ACTIVITY";
 
+    private double MAX_BUZZ_FREQUENCY = 1000;
+    private double MIN_BUZZ_FREQUENCY = 200;
+    private int BUZZ_DURATION = 800;
+
     private Button btnRedTeam;
     private Button btnBlueTeam;
 
@@ -46,6 +50,8 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
     private long currentCaptureTime;
 
     private int currentTeamCapture;
+
+    private boolean gameStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +89,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
                         CaptureTheFlagSettingsParameters.PAR_TIMER_BUTTONPRESSTIME
                 );
         currentCaptureTime = currentTeamCapture = 0;
+        gameStarted =false;
     }
 
     @Override
@@ -94,7 +101,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (gameCountDown ==null) {
+        if (!gameStarted) {
             switch (item.getItemId()) {
                 case R.id.mnuSettings:
                     Intent i = new Intent(this, SettingsActivity.class);
@@ -112,6 +119,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
     }
 
     private void startGame() {
+        gameStarted = true;
         gameCountDown = new CountDownTimer(gameTime * 1000, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -126,16 +134,14 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-
-        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-        {
-            holdButtonBeginTouch(view);
-            return true;
-        }
-        else if(motionEvent.getAction() == MotionEvent.ACTION_UP)
-        {
-            holdButtonEndTouch(view);
-            return true;
+        if(gameStarted) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                holdButtonBeginTouch(view);
+                return true;
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                holdButtonEndTouch(view);
+                return true;
+            }
         }
         return false;
     }
@@ -205,13 +211,15 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
             captureCountDown = new CountDownTimer(gameTime * 1000, 700) {
                 @Override
                 public void onTick(long l) {
-                    soundService.makeBip();
+
                     if (currentTeamCapture == R.id.btnBlueTeam) {
                         currentCaptureTime -= 700;
                     } else {
                         currentCaptureTime += 700;
                     }
-                    fragProgress.setProgress((int) (100* currentCaptureTime / (captureTime * 1000)));
+                    int progressPercentage = (int) (100* currentCaptureTime / (captureTime * 1000));
+                    soundService.makeBuzz(MIN_BUZZ_FREQUENCY + ((MAX_BUZZ_FREQUENCY - MIN_BUZZ_FREQUENCY) * Math.abs(progressPercentage) / 100), BUZZ_DURATION);
+                    fragProgress.setProgress(progressPercentage);
                     if (Math.abs(currentCaptureTime) > captureTime * 1000) {
                         captureTimeFinish();
                     }
@@ -227,6 +235,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
     }
 
     private void captureTimeFinish() {
+
         if(currentTeamCapture == R.id.btnBlueTeam)
         {
             blueTeamWins();
@@ -234,10 +243,12 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
         else {
             redTeamWins();
         }
+
     }
 
     private void blueTeamWins() {
         fragTimer.setTimer("Blue Team Wins");
+        soundService.bombExplose();
         resetParty();
     }
 
@@ -245,6 +256,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
 
     private void redTeamWins() {
         fragTimer.setTimer("Red Team Wins");
+        soundService.bombExplose();
         resetParty();
 
     }
@@ -252,6 +264,7 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
     private void noWins()
     {
         fragTimer.setTimer("No one Wins");
+        soundService.bombExplose();
         resetParty();
     }
 
@@ -267,7 +280,9 @@ public class CaptureTheFlagActivity extends AppCompatActivity implements Button.
             gameCountDown = null;
         }
         currentCaptureTime = currentTeamCapture = 0;
+        fragProgress.setProgress(0);
         blockButton(0);
+        gameStarted = false;
     }
 
     private void blockButton(int buttonPressedId) {

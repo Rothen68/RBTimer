@@ -58,6 +58,10 @@ public class SensorManagement implements SensorEventListener {
         currentMaxAcceleration=0;
     }
 
+    public void setTargetAcceleration(double targetAcceleration)
+    {
+        this.targetAcceleration = targetAcceleration;
+    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {

@@ -30,13 +30,11 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
 
     public static final String BOMBPLANT_ACTIVITY = "BOMBPLANT_ACTIVITY";
 
-    private double MIN_ACCELERATION_LEVEL = 1;
 
-    private double BOMB_EXPLODE_LEVEL = 9;
 
     private double MAX_BUZZ_FREQUENCY = 6000;
     private double MIN_BUZZ_FREQUENCY = 200;
-    private int BUZZ_DURATION = 100;
+    private int BUZZ_DURATION = 500;
 
     private CountDownTimer buttonCountDown;
     private CountDownTimer bombCountDown;
@@ -58,6 +56,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
     private String currentNFCTag = "";
     private Boolean useNFCTag;
     private boolean isNewIntent=false;
+    private boolean gameStarted;
 
 
 
@@ -69,53 +68,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
         timerFragment = (TimerFragment) getSupportFragmentManager().findFragmentById(R.id.fragTimer);
         holdButtonFragment = (HoldButtonFragment) getSupportFragmentManager().findFragmentById(R.id.fragHoldButton);
 
-        sensorManagement = new SensorManagement(this, new SensorManagement.SensorListener() {
 
-            CountDownTimer timer;
-
-            void resetTimer() {
-                timer = null;
-            }
-
-            @Override
-            public void onMouvement(double intencityPercentage) {
-                if (timer == null) {
-                    if (intencityPercentage >= 100) {
-                        setBombExplosed();
-                        if (isBombArmed) {
-                            terroWins();
-                        } else {
-                            ctWins();
-                        }
-                    } else {
-                        if (intencityPercentage < 50) {
-                            holdButtonFragment.setPercentage(intencityPercentage * 2);
-                        } else {
-                            holdButtonFragment.setPercentage(100);
-                        }
-
-                        soundService.makeBuzz(MIN_BUZZ_FREQUENCY + ((MAX_BUZZ_FREQUENCY - MIN_BUZZ_FREQUENCY) * intencityPercentage / 100), BUZZ_DURATION);
-                    }
-                    timer = new CountDownTimer(BUZZ_DURATION * 2, BUZZ_DURATION) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            resetTimer();
-                        }
-                    }.start();
-                }
-            }
-
-            @Override
-            public void onNonSignificantMovement() {
-            }
-        },
-                BOMB_EXPLODE_LEVEL,
-                MIN_ACCELERATION_LEVEL);
 
         soundService = new SoundService(this);
         nfcService = new NFCService(this, new NFCService.NFCAdapterListener() {
@@ -124,6 +77,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
                 onTagLost();
             }
         });
+        gameStarted=false;
     }
 
 
@@ -133,11 +87,59 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
         super.onResume();
         if (!isNewIntent) {
             parametersService = new ParametersService(this, new BombSettingsParameters(this));
+            sensorManagement = new SensorManagement(this, new SensorManagement.SensorListener() {
+
+                CountDownTimer timer;
+
+                void resetTimer() {
+                    timer = null;
+                }
+
+                @Override
+                public void onMouvement(double intencityPercentage) {
+                    if (timer == null && gameStarted) {
+                        if (intencityPercentage >= 100) {
+                            setBombExplosed();
+                            if (isBombArmed) {
+                                terroWins();
+                            } else {
+                                ctWins();
+                            }
+                        } else {
+                            if (intencityPercentage < 50) {
+                                holdButtonFragment.setPercentage(intencityPercentage * 2);
+                            } else {
+                                holdButtonFragment.setPercentage(100);
+                            }
+
+                            soundService.makeBuzz(MIN_BUZZ_FREQUENCY + ((MAX_BUZZ_FREQUENCY - MIN_BUZZ_FREQUENCY) * intencityPercentage / 100), BUZZ_DURATION);
+                        }
+                        timer = new CountDownTimer(BUZZ_DURATION * 2, BUZZ_DURATION) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                resetTimer();
+                            }
+                        }.start();
+                    }
+                }
+
+                @Override
+                public void onNonSignificantMovement() {
+                }
+            },
+                    parametersService.getFloat(BombSettingsParameters.CAT_ACCELEROMETERS,BombSettingsParameters.PAR_ACCELEROMETERS_T),
+                    0.5);
             sensorManagement.onResume();
             useNFCTag = parametersService.getBoolean(
                     BombSettingsParameters.CAT_NFC,
                     BombSettingsParameters.PAR_NFC_ISENABLED);
             resetBomb();
+
         }
         else
         {
@@ -164,14 +166,16 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (!isBombArmed) {
+        if (!gameStarted) {
             switch (item.getItemId()) {
                 case R.id.mnuSettings:
                     Intent i = new Intent(this, SettingsActivity.class);
                     i.putExtra(SettingsActivity.SETTINGS_ACTIVITY_TYPE, BOMBPLANT_ACTIVITY);
                     startActivity(i);
                     return true;
-
+                case R.id.mnuStart:
+                    gameStarted=true;
+                    resetBomb();
                 default:
                     return super.onOptionsItemSelected(item);
             }
@@ -195,6 +199,7 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
     private void setBombArmed() {
         isBombArmed = true;
         holdButtonFragment.setBtnHoldText(getResources().getString(R.string.bombDefuse_DisarmBomb));
+        sensorManagement.setTargetAcceleration(parametersService.getFloat(BombSettingsParameters.CAT_ACCELEROMETERS,BombSettingsParameters.PAR_ACCELEROMETERS_CT));
         soundService.bombPlanted();
     }
 
@@ -245,63 +250,66 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
     private void terroWins() {
         soundService.terroWins();
         timerFragment.setTimer(getResources().getString(R.string.bombDefuse_TerroWins));
+        gameStarted=false;
     }
 
     private void ctWins() {
         soundService.ctWins();
         timerFragment.setTimer(getResources().getString(R.string.bombDefuse_CTWins));
+        gameStarted=false;
     }
 
     //HoldButtonFragment.HoldButtonListener
     @Override
     public void holdButtonBeginTouch() {
-        if (!isBombExplosed) {
-            if (isBombArmed) {
-                int factor = 1;
-                if(isDefuseKit)
-                {
-                    factor = parametersService.getInt(BombSettingsParameters.CAT_BOMB,BombSettingsParameters.PAR_BOMB_DEFUSEKIT_FACTOR);
+        if(gameStarted) {
+            if (!isBombExplosed) {
+                if (isBombArmed) {
+                    int factor = 1;
+                    if (isDefuseKit) {
+                        factor = parametersService.getInt(BombSettingsParameters.CAT_BOMB, BombSettingsParameters.PAR_BOMB_DEFUSEKIT_FACTOR);
+                    }
+                    final int disarmDuration = parametersService.getInt(BombSettingsParameters.CAT_BOMB, BombSettingsParameters.PAR_BOMB_DISARM_DURATION) * 1000 / factor;
+
+                    buttonCountDown = new CountDownTimer(disarmDuration, 100) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / disarmDuration)));
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            holdButtonFragment.setProgressState(0);
+
+                            bombCountDown.cancel();
+                            diplayRemainingTime();
+                            setBombDisarmed();
+                            ctWins();
+                            resetBomb();
+
+                        }
+                    }.start();
+                } else {
+                    final int armDuration = parametersService.getInt(BombSettingsParameters.CAT_BOMB, BombSettingsParameters.PAR_BOMB_ARM_DURATION) * 1000;
+                    buttonCountDown = new CountDownTimer(armDuration, 100) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / armDuration)));
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            holdButtonFragment.setProgressState(0);
+
+                            setBombArmed();
+                            startBombTimer();
+
+                        }
+                    }.start();
                 }
-                final int disarmDuration = parametersService.getInt(BombSettingsParameters.CAT_BOMB, BombSettingsParameters.PAR_BOMB_DISARM_DURATION) * 1000/factor;
-
-                buttonCountDown = new CountDownTimer(disarmDuration, 100) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / disarmDuration)));
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        holdButtonFragment.setProgressState(0);
-
-                        bombCountDown.cancel();
-                        diplayRemainingTime();
-                        setBombDisarmed();
-                        ctWins();
-                        resetBomb();
-
-                    }
-                }.start();
             } else {
-                final int armDuration = parametersService.getInt(BombSettingsParameters.CAT_BOMB, BombSettingsParameters.PAR_BOMB_ARM_DURATION) * 1000;
-                buttonCountDown = new CountDownTimer(armDuration, 100) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        holdButtonFragment.setProgressState((int) (100 - (100 * millisUntilFinished / armDuration)));
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        holdButtonFragment.setProgressState(0);
-
-                        setBombArmed();
-                        startBombTimer();
-
-                    }
-                }.start();
+                resetBomb();
             }
-        } else {
-            resetBomb();
         }
     }
 
@@ -347,17 +355,19 @@ public class BombPlantActivity extends AppCompatActivity implements HoldButtonFr
 
     @Override
     public void holdButtonEndTouch() {
-        if (buttonCountDown != null) {
-            buttonCountDown.cancel();
-        }
+        if(gameStarted) {
+            if (buttonCountDown != null) {
+                buttonCountDown.cancel();
+            }
 
-        holdButtonFragment.setProgressState(0);
+            holdButtonFragment.setProgressState(0);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.main_start_menu, menu);
         return true;
     }
 

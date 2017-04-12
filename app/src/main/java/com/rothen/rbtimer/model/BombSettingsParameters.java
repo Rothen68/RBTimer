@@ -19,7 +19,7 @@ public class BombSettingsParameters implements IActivitySettingsParameters {
 
     public static final String CAT_ACCELEROMETERS = "CAT_ACCELEROMETERS";
     public static final String PAR_ACCELEROMETERS_CT = CAT_ACCELEROMETERS + "PAR_ACCELEROMETERS_CT";
-    public static final String PAR_ACCELEROMETERS_T = CAT_ACCELEROMETERS + "PAR_ACCELEROMETERS_CT";
+    public static final String PAR_ACCELEROMETERS_T = CAT_ACCELEROMETERS + "PAR_ACCELEROMETERS_T";
 
     public static final String CAT_BOMB = "CAT_BOMB";
     public static final String PAR_BOMB_DURATION= CAT_BOMB + "PAR_BOMB_DURATION";

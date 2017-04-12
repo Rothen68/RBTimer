@@ -89,6 +89,10 @@ public class SettingsActivity extends AppCompatActivity {
                         parameterValue.setInputType(InputType.TYPE_CLASS_TEXT);
                         break;
                     case TYPE_FLOAT:
+
+                        parameterValue.setText(p.getValue() +"" );
+                        parameterValue.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                        break;
                     case TYPE_INT:
                         parameterValue.setText(p.getValue() +"" );
                         parameterValue.setInputType(InputType.TYPE_CLASS_NUMBER);
